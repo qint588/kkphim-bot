@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 import { ICategory } from "./category.model";
 import { ICountry } from "./country.model";
 
-interface IMovie extends Document {
+export interface IMovie extends Document {
   imdb: string | null;
   tmdb: string | null;
   name: string;
@@ -25,6 +25,8 @@ interface IMovie extends Document {
   categories: ICategory["_id"][];
   countries: ICountry["_id"][];
   episodes: mongoose.Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const movieSchema = new Schema<IMovie>(

@@ -3,6 +3,8 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface ICountry extends Document {
   name: string;
   slug: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const countrySchema = new Schema<ICountry>(

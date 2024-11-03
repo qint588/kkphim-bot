@@ -3,6 +3,8 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface ICategory extends Document {
   name: string;
   slug: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const categorySchema = new Schema<ICategory>(

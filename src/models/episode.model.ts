@@ -9,6 +9,8 @@ export interface IEpisode extends Document {
   episodeLinkM3u8: string;
   serverName: string;
   movie: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const episodeSchema = new Schema<IEpisode>(
