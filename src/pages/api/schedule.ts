@@ -4,7 +4,6 @@ import Country from "@/models/country.model";
 import Episode, { IEpisode } from "@/models/episode.model";
 import Movie from "@/models/movie.model";
 import axios from "axios";
-import mongoose from "mongoose";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data = {
@@ -70,17 +69,17 @@ interface IKkPhimEpisode {
   }>;
 }
 
-const fetchMovie = async (totalPage: number = 1): Promise<IKkPhimMovie[]> => {
+const fetchMovie = async (page: number = 1): Promise<IKkPhimMovie[]> => {
   let listPromise = [];
-  for (let index = 1; index <= totalPage; index++) {
-    listPromise.push(
-      axios.get("https://phimapi.com/danh-sach/phim-moi-cap-nhat", {
-        params: {
-          page: index,
-        },
-      })
-    );
-  }
+  // for (let index = 1; index <= totalPage; index++) {
+  listPromise.push(
+    axios.get("https://phimapi.com/danh-sach/phim-moi-cap-nhat", {
+      params: {
+        page,
+      },
+    })
+  );
+  // }
 
   const listDetailPromise = (await Promise.allSettled(listPromise))
     .filter((el) => el.status == "fulfilled")
@@ -210,10 +209,21 @@ export default async function handler(
 ) {
   await connectToDatabase();
 
-  const movies = await fetchMovie(10);
-  movies.forEach(async (movie) => {
-    await storeMovie(movie);
-  });
+  for (let index = 1; index <= 15; index++) {
+    console.table({ currentpage: index });
+    const movies = await fetchMovie(index);
+    console.table(
+      movies.map((el) => {
+        return {
+          name: el.name,
+          slug: el.slug,
+        };
+      })
+    );
+    movies.forEach(async (movie) => {
+      await storeMovie(movie);
+    });
+  }
 
   res.status(200).json({ message: "Schedule running..." });
 }
