@@ -1,6 +1,7 @@
 import { IDataResponse } from "@/lib/global";
 import Category, { ICategory } from "@/models/category.model";
 import Country, { ICountry } from "@/models/country.model";
+import Episode, { IEpisode } from "@/models/episode.model";
 import Movie, { IMovie } from "@/models/movie.model";
 import movieResource from "@/resources/movie.resource";
 import _ from "lodash";
@@ -55,7 +56,7 @@ class MovieService {
 
     const movies: IMovie[] = await Movie.find(query)
       .select(
-        "_id name originalName slug originalName porsterUrl thumbUrl year episodeCurrent lang quality modifiedTimeAt categories countries createdAt updatedAt"
+        "_id name originalName slug originalName porsterUrl thumbUrl year episodeCurrent type status lang quality modifiedTimeAt categories countries createdAt updatedAt"
       )
       .sort({
         modifiedTimeAt: -1,
@@ -84,8 +85,51 @@ class MovieService {
     return await Country.find().select("_id name slug");
   }
 
-  async detail(id: string): Promise<IMovie | null> {
-    return null;
+  async detail(slug: string): Promise<{
+    movie: IMovie;
+    episodes: IEpisode[];
+  }> {
+    const movie = await Movie.findOne({ slug });
+
+    const categories = await Category.find({
+      _id: {
+        $in: movie.categories,
+      },
+    }).select("_id name");
+    const countries = await Country.find({
+      _id: {
+        $in: movie.countries,
+      },
+    }).select("_id name");
+    const episodes = await Episode.aggregate([
+      {
+        $match: {
+          _id: {
+            $in: movie.episodes,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$serverName",
+          count: { $sum: 1 },
+          documents: { $push: "$$ROOT" },
+        },
+      },
+      {
+        $sort: { count: 1 },
+      },
+    ]);
+
+    movie.categories = categories;
+    movie.countries = countries;
+
+    const { episodes: tempEpisodes, ...newMovieResource } = movie._doc;
+
+    return {
+      movie: newMovieResource,
+      episodes,
+    };
   }
 }
 
