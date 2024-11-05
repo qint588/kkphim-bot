@@ -131,6 +131,27 @@ class MovieService {
       episodes,
     };
   }
+
+  async getYears(): Promise<Array<{ _id: number; count: number }>> {
+    const years = await Movie.aggregate([
+      {
+        $group: {
+          _id: "$year",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $match: { _id: { $gt: 0 } },
+      },
+      {
+        $sort: {
+          _id: -1,
+        },
+      },
+    ]);
+
+    return years;
+  }
 }
 
 export default new MovieService();
