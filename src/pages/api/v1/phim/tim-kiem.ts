@@ -5,6 +5,58 @@ import movieService from "@/services/movie.service";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { z, ZodError } from "zod";
 
+/**
+ * @swagger
+ * /api/v1/phim/tim-kiem:
+ *   get:
+ *     description: Trả ra danh sách phim theo điều kiện
+ *     parameters:
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *         description: Từ khoá cần tìm
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: integer
+ *         description: Năm
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Trang thái (ongoing|completed)
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *         description: Loại phim (hoathinh|series|single|tvshows)
+ *       - in: query
+ *         name: categories
+ *         schema:
+ *           type: string
+ *         description: Danh sách thể loại (hai-huoc,tam-ly)
+ *       - in: query
+ *         name: countries
+ *         schema:
+ *           type: string
+ *         description: Danh sách quốc gia (au-my,trung-quoc)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Số trang cần lấy (mặc định là 1)
+ *       - in: query
+ *         name: per_page
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Số lượng phim trên mỗi trang (mặc định là 10)
+ *     responses:
+ *       200:
+ *         description: Danh sách phim theo điều kiện
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IErrorResponse | IDataResponse<IMovie>>
@@ -50,6 +102,8 @@ export default async function handler(
         errors: formattedErrors,
       });
     } else {
+      console.log(error);
+
       res.status(500).json({ message: "Server error" });
     }
   }

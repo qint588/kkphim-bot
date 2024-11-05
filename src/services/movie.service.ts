@@ -54,13 +54,26 @@ class MovieService {
       query.status = params?.status;
     }
 
-    const movies: IMovie[] = await Movie.find(query)
+    if (params?.keyword) {
+      query = {
+        ...query,
+        $text: { $search: params?.keyword },
+      };
+    }
+
+    const movies: IMovie[] = await Movie.find(query, {
+      score: { $meta: "textScore" },
+    })
       .select(
         "_id name originalName slug originalName porsterUrl thumbUrl year episodeCurrent type status lang quality modifiedTimeAt categories countries createdAt updatedAt"
       )
-      .sort({
-        modifiedTimeAt: -1,
-      })
+      .sort(
+        params?.keyword
+          ? { score: { $meta: "textScore" } }
+          : {
+              modifiedTimeAt: -1,
+            }
+      )
       .skip((page - 1) * limit)
       .limit(limit);
 

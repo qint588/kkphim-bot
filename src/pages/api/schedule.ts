@@ -209,7 +209,8 @@ export default async function handler(
 ) {
   await connectToDatabase();
 
-  for (let index = 1; index <= 15; index++) {
+  const maxPage = (req?.query?.max_page || 15) as number;
+  for (let index = 1; index <= maxPage; index++) {
     console.table({ currentpage: index });
     const movies = await fetchMovie(index);
     console.table(
