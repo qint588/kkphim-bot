@@ -27,6 +27,7 @@ export interface IMovie extends Document {
   episodes: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
+  sortId: string;
 }
 
 const movieSchema = new Schema<IMovie>(
