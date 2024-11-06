@@ -102,8 +102,6 @@ export default async function handler(
         errors: formattedErrors,
       });
     } else {
-      console.log(error);
-
       res.status(500).json({ message: "Server error" });
     }
   }

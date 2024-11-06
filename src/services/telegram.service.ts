@@ -7,7 +7,12 @@ import {
   startInlineKeyboard,
   startKeyBoard,
 } from "@/utils/telegram";
-import TelegramBot, { ChatId, MessageId } from "node-telegram-bot-api";
+import TelegramBot, {
+  ChatId,
+  InlineQueryResult,
+  MessageId,
+} from "node-telegram-bot-api";
+import movieService from "./movie.service";
 
 class TelegramService {
   async process() {
@@ -42,6 +47,18 @@ class TelegramService {
         {
           reply_markup: {
             inline_keyboard: startInlineKeyboard(),
+          },
+        }
+      );
+    });
+
+    bot.onText(/\/search/, async function (msg: TelegramBot.Message) {
+      await bot.sendMessage(
+        msg.chat.id,
+        `To find the movie you need, click the "Start Search" button and enter your request or simply send your request in a message`,
+        {
+          reply_markup: {
+            inline_keyboard: searchInlineKeyboard(),
           },
         }
       );
@@ -149,6 +166,56 @@ Mandatory conditions!
           }
         );
       }
+    });
+
+    bot.on("inline_query", async (query) => {
+      const limit = 20;
+      const offset: number = query.offset ? parseInt(query.offset, 10) : 0;
+      const page = offset / limit + 1;
+      const { items, pagination } = await movieService.search({
+        page,
+        per_page: limit,
+        keyword: query.query,
+      });
+
+      const inlineQueryResult =
+        page == 1 && items.length == 0
+          ? [
+              {
+                id: "nocontent",
+                type: "article",
+                title: "No results found 😓",
+                input_message_content: {
+                  message_text: "/search",
+                },
+                description: "⚠️ If it doesn't work, read the instructions.",
+              },
+            ]
+          : items.map((el) => {
+              return {
+                id: el._id,
+                type: "article",
+                title: el.name,
+                input_message_content: {
+                  message_text: `kk${el._id}`,
+                },
+                thumb_url: el.thumbUrl,
+                thumb_height: 100,
+                thumb_width: 100,
+                description: `${el.lang} | ${el.quality} | ${el.categories
+                  .map((el: any) => el.name)
+                  .join(", ")}`,
+              };
+            });
+
+      await bot.answerInlineQuery(
+        query.id,
+        inlineQueryResult as InlineQueryResult[],
+        {
+          cache_time: 1,
+          next_offset: `${page * limit}`,
+        }
+      );
     });
   }
 }

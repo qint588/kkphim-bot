@@ -61,9 +61,14 @@ class MovieService {
       };
     }
 
-    const movies: IMovie[] = await Movie.find(query, {
-      score: { $meta: "textScore" },
-    })
+    const movies: IMovie[] = await Movie.find(
+      query,
+      query?.keyboard
+        ? {
+            score: { $meta: "textScore" },
+          }
+        : {}
+    )
       .select(
         "_id name originalName slug originalName porsterUrl thumbUrl year episodeCurrent type status lang quality modifiedTimeAt categories countries createdAt updatedAt"
       )
