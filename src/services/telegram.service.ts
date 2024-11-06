@@ -1,4 +1,6 @@
+import connectToDatabase from "@/lib/mongoose";
 import { telegramBot as bot } from "@/lib/telegram";
+import User from "@/models/user.model";
 import {
   instructionInlineKeyboard,
   searchInlineKeyboard,
@@ -9,7 +11,24 @@ import TelegramBot, { ChatId, MessageId } from "node-telegram-bot-api";
 
 class TelegramService {
   async process() {
+    await connectToDatabase();
+
     bot.onText(/\/start/, async function (msg: TelegramBot.Message) {
+      await User.findOneAndUpdate(
+        {
+          userId: msg.from?.id,
+        },
+        {
+          userId: msg.from?.id,
+          userName: msg.from?.username,
+          firstName: msg.from?.first_name,
+          languageCode: msg.from?.language_code,
+        },
+        {
+          upsert: true,
+          new: true,
+        }
+      );
       await bot.sendMessage(msg.chat.id, "/start", {
         reply_markup: {
           keyboard: startKeyBoard(),
@@ -19,7 +38,7 @@ class TelegramService {
         msg.chat.id,
         `🍿 Hello, movie buff!
   
-  🔍 To search, use the buttons below or send a movie title in a message`,
+🔍 To search, use the buttons below or send a movie title in a message`,
         {
           reply_markup: {
             inline_keyboard: startInlineKeyboard(),
