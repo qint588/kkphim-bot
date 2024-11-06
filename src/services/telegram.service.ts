@@ -13,6 +13,7 @@ import TelegramBot, {
   MessageId,
 } from "node-telegram-bot-api";
 import movieService from "./movie.service";
+import moment from "moment";
 
 class TelegramService {
   async process() {
@@ -77,9 +78,21 @@ class TelegramService {
     });
 
     bot.onText(/⚙️ Setting/, async function (msg: TelegramBot.Message) {
+      const user = await User.findOne({
+        userId: msg.from?.id,
+      });
       await bot.sendMessage(
         msg.chat.id,
-        "⚠️ Feature is under development, please come back later"
+        `⚙️ Bot settings
+
+🆔 ${user.userId}
+🕔 Registration date ${moment(user.createdAt).format("DD.MM.YYYY H:mm:ss")}
+💝 VIP disabled`,
+        {
+          reply_markup: {
+            inline_keyboard: instructionInlineKeyboard(),
+          },
+        }
       );
     });
 
@@ -132,9 +145,16 @@ HOW TO USE THE BOT?
           query.message?.chat.id as ChatId,
           query.message?.message_id as number
         );
+        const user = await User.findOne({
+          userId: query.message?.chat.id,
+        });
         await bot.sendMessage(
           query.message?.chat.id as ChatId,
-          "⚠️ Feature is under development, please come back later",
+          `⚙️ Bot settings
+  
+🆔 ${user.userId}
+🕔 Registration date ${moment(user.createdAt).format("DD.MM.YYYY H:mm:ss")}
+💝 VIP disabled`,
           {
             reply_markup: {
               inline_keyboard: instructionInlineKeyboard(),
